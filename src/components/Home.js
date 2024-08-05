@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import {
   AppBar,
   Avatar,
-  Box,
   Button,
+  Box,
   Container,
   IconButton,
   Menu,
   MenuItem,
-  TextField,
   Toolbar,
-  Typography
+  Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
@@ -19,7 +18,7 @@ import { fetchUserData } from '../utils/api';
 import UserProfile from '../components/profile/UserProfile';
 
 const Home = () => {
-  const { codeforcesId, setCodeforcesId, codechefId, setCodechefId, setUserData } = useUser();
+  const { codeforcesId, codechefId, leetcodeId, Institution, setUserData } = useUser();
   const { setLoggedIn } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -53,7 +52,7 @@ const Home = () => {
   };
 
   const handleSettings = () => {
-    navigate('/settings');  
+    navigate('/settings');
     handleClose();
   };
 
@@ -82,25 +81,13 @@ const Home = () => {
           <Typography variant="h4">Welcome to the Home Page</Typography>
         </header>
         <main style={styles.main}>
-          <Typography variant="h6">Enter your Codeforces and CodeChef IDs</Typography>
-          <TextField
-            label="Codeforces ID"
-            value={codeforcesId}
-            onChange={(e) => setCodeforcesId(e.target.value)}
-            fullWidth
-            InputProps={{ readOnly: true }}
-            margin="normal"
-          />
-          <TextField
-            label="CodeChef ID"
-            value={codechefId}
-            onChange={(e) => setCodechefId(e.target.value)}
-            InputProps={{ readOnly: true }}
-            fullWidth
-            margin="normal"
-          />
+          <Typography variant="h6">User Information</Typography>
+          <Typography variant="body1">Codeforces ID: {codeforcesId}</Typography>
+          <Typography variant="body1">CodeChef ID: {codechefId}</Typography>
+          <Typography variant="body1">LeetCode ID: {leetcodeId}</Typography>
+          <Typography variant="body1">Institution: {Institution}</Typography>
           <Button variant="contained" color="primary" onClick={handleFetchData} disabled={loading}>
-            {loading ? 'Loading...' : 'Fetch Data'}
+            {loading ? 'Loading...' : 'Show Data'}
           </Button>
           <UserProfile />
         </main>
@@ -110,6 +97,9 @@ const Home = () => {
 };
 
 const styles = {
+  body:{
+    backgroundColor:'blur'
+  },
   container: {
     textAlign: 'center',
     marginTop: '50px',

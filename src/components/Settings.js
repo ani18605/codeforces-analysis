@@ -11,35 +11,56 @@ import {
   IconButton
 } from '@mui/material';
 import { firestore } from '../firebase-config';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import {  useAuthContext } from '../context/AuthContext';
+import { deleteField, doc, setDoc } from 'firebase/firestore';
+import { useAuthContext } from '../context/AuthContext';
 import { ArrowBack } from '@mui/icons-material';
-import { getAuth, updatePassword, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useUser } from '../context/UserContext';
+import './settings.css'; // Import the CSS file
 
 const Settings = () => {
-  const {  setLoggedIn ,  setEmail   , setuser } = useAuthContext();
-  const { codeforcesId : cfId,
-    codechefId : cdId,
-    leetcodeId : ltId, 
-    Institution : iid } = useUser();
-  const { email , user } = useAuthContext();
-  const [codechefId, setCodechefId] = useState(cdId);
-  const [codeforcesId, setCodeforcesId] = useState(cfId);
-  const [leetcodeId, setLeetcodeId] = useState(ltId);
-  const [institution, setInstitution] = useState(iid);
+  const { setLoggedIn, setEmail, setUser, email, user, loggedIn } = useAuthContext();
+  const { codeforcesId: cfId, codechefId: cdId, leetcodeId: ltId, Institution: iid , 
+    setCodeforcesId : setcfId,
+    setCodechefId : setCdId,
+    setLeetcodeId : setLeetId,
+    setInstitution : setIid,  } = useUser();
+  const [codechefId, setCodechefId] = useState(cdId || '');
+  const [codeforcesId, setCodeforcesId] = useState(cfId || '');
+  const [leetcodeId, setLeetcodeId] = useState(ltId || '');
+  const [institution, setInstitution] = useState(iid || '');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Load user data from local storage on mount
+    const storedUserData = JSON.parse(localStorage.getItem('userData'));
+    if (storedUserData) {
+      setCodechefId(storedUserData.codechefId || '');
+      setCodeforcesId(storedUserData.codeforcesId || '');
+      setLeetcodeId(storedUserData.leetcodeId || '');
+      setInstitution(storedUserData.institution || '');
+    }
+  }, []);
 
   const handleSaveIds = async () => {
-    if (user) {
+    if (user && user.uid) {
       const userIds = { codechefId, codeforcesId, leetcodeId, institution };
       try {
+        setcfId(codeforcesId);
+        setCdId(codechefId);
+        setLeetId(leetcodeId);
+        setInstitution(institution);
         const userRef = doc(firestore, 'users', user.uid);
+
         await setDoc(userRef, userIds, { merge: true });
-        localStorage.setItem('userIds', JSON.stringify(userIds));
+
+        // Save to local storage
+        localStorage.setItem('userData', JSON.stringify(userIds));
+
+        // Update context state if necessary
+        setUser((prevUser) => ({ ...prevUser, ...userIds }));
+
         toast.success('IDs saved successfully');
       } catch (error) {
         console.error('Error saving IDs:', error);
@@ -52,41 +73,22 @@ const Settings = () => {
 
   const handleDeleteAccount = async () => {
     localStorage.removeItem("loggedIn");
-    localStorage.removeItem("user");
-    setLoggedIn(null);
+    localStorage.removeItem("userData");
+    setLoggedIn(false);
     setEmail(null);
-    setuser(null);
+    setUser(null);
     navigate("/");
-    // if (user) {
-    //   try {
-    //     const providerId = user.providerData[0].providerId;
-    //     if (providerId === 'password') {
-    //       // Reauthenticate user before deleting
-    //       const credential = EmailAuthProvider.credential(user.email, oldPassword);
-    //       await reauthenticateWithCredential(user, credential);
-    //     }
-    //     await deleteUser(user);
-    //     localStorage.removeItem('user');
-    //     toast.success('Account deleted successfully');
-    //     navigate('/');
-    //   } catch (error) {
-    //     console.error('Error deleting account:', error);
-    //     toast.error('Error deleting account: ' + error.message);
-    //   }
-    // } else {
-    //   toast.error('No user is signed in');
-    // }
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container component="main" maxWidth="sm" className="container">
       <ToastContainer />
-      <Paper elevation={3} sx={{ padding: 4, marginTop: 8 }}>
+      <Paper elevation={3} className="paper">
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <IconButton onClick={() => navigate('/home')} sx={{ position: 'absolute', top: 16, left: 16 }}>
             <ArrowBack />
           </IconButton>
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }} />
+          <Avatar className="avatar" />
           <Typography component="h1" variant="h5">
             Settings
           </Typography>
@@ -122,18 +124,15 @@ const Settings = () => {
               value={institution}
               onChange={(e) => setInstitution(e.target.value)}
             />
-
             <Button
               fullWidth
               variant="contained"
               color="primary"
-              sx={{ mt: 2 }}
+              className="button"
               onClick={handleSaveIds}
             >
               Save IDs
             </Button>
-
-
             <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
               Delete Account
             </Typography>
@@ -141,7 +140,7 @@ const Settings = () => {
               fullWidth
               variant="outlined"
               color="error"
-              sx={{ mt: 2 }}
+              className="button"
               onClick={handleDeleteAccount}
             >
               Delete Account
