@@ -1,13 +1,41 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, IconButton, Typography, Button, Menu, MenuItem, TextField } from '@material-ui/core';
-import { AccountCircle } from '@material-ui/icons';
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  TextField,
+  Toolbar,
+  Typography
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+import { useAuthContext } from '../context/AuthContext';
+import { fetchUserData } from '../utils/api';
+import UserProfile from '../components/profile/UserProfile';
 
-function Home() {
+const Home = () => {
+  const { codeforcesId, setCodeforcesId, codechefId, setCodechefId, setUserData } = useUser();
+  const { setLoggedIn } = useAuthContext();
+  const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [institutionName, setInstitutionName] = useState('');
-  const [codeforcesHandle, setCodeforcesHandle] = useState('');
-  const [codechefHandle, setCodechefHandle] = useState('');
-  const [leetcodeHandle, setLeetcodeHandle] = useState('');
+  const navigate = useNavigate();
+
+  const handleFetchData = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchUserData(codeforcesId, codechefId);
+      setUserData(data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -17,85 +45,83 @@ function Home() {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    setLoggedIn(false);
+    localStorage.removeItem('user');
+    localStorage.removeItem('loggedIn');
+    navigate('/');
+  };
+
   const handleSettings = () => {
-    // Handle settings action
+    navigate('/settings');  
     handleClose();
   };
 
-  const handleSave = () => {
-    // Handle save action
-    console.log('Institution Name:', institutionName);
-    console.log('Codeforces Handle:', codeforcesHandle);
-    console.log('CodeChef Handle:', codechefHandle);
-    console.log('LeetCode Handle:', leetcodeHandle);
-  };
-
   return (
-    <div>
+    <Container>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Home
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            AlgoHub
           </Typography>
-          <div>
-            <IconButton
-              edge="end"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={handleSettings}>Settings</MenuItem>
-            </Menu>
-          </div>
+          <IconButton onClick={handleMenu} color="inherit">
+            <Avatar />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={handleSettings}>Settings</MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
-      <div style={{ padding: 16 }}>
-        <Typography variant="h5">Settings</Typography>
-        <form noValidate autoComplete="off">
+      <Box sx={styles.container}>
+        <header style={styles.header}>
+          <Typography variant="h4">Welcome to the Home Page</Typography>
+        </header>
+        <main style={styles.main}>
+          <Typography variant="h6">Enter your Codeforces and CodeChef IDs</Typography>
           <TextField
-            label="Institution Name"
-            value={institutionName}
-            onChange={(e) => setInstitutionName(e.target.value)}
+            label="Codeforces ID"
+            value={codeforcesId}
+            onChange={(e) => setCodeforcesId(e.target.value)}
             fullWidth
+            InputProps={{ readOnly: true }}
             margin="normal"
           />
           <TextField
-            label="Codeforces Handle"
-            value={codeforcesHandle}
-            onChange={(e) => setCodeforcesHandle(e.target.value)}
+            label="CodeChef ID"
+            value={codechefId}
+            onChange={(e) => setCodechefId(e.target.value)}
+            InputProps={{ readOnly: true }}
             fullWidth
             margin="normal"
           />
-          <TextField
-            label="CodeChef Handle"
-            value={codechefHandle}
-            onChange={(e) => setCodechefHandle(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="LeetCode Handle"
-            value={leetcodeHandle}
-            onChange={(e) => setLeetcodeHandle(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <Button variant="contained" color="primary" onClick={handleSave} style={{ marginTop: 16 }}>
-            Save
+          <Button variant="contained" color="primary" onClick={handleFetchData} disabled={loading}>
+            {loading ? 'Loading...' : 'Fetch Data'}
           </Button>
-        </form>
-      </div>
-    </div>
+          <UserProfile />
+        </main>
+      </Box>
+    </Container>
   );
-}
+};
+
+const styles = {
+  container: {
+    textAlign: 'center',
+    marginTop: '50px',
+  },
+  header: {
+    backgroundColor: '#282c34',
+    padding: '20px',
+    color: 'white',
+  },
+  main: {
+    marginTop: '20px',
+  },
+};
 
 export default Home;

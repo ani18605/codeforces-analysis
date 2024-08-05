@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {  firestore } from '../firebase-config';
+import { firestore } from '../firebase-config';
 import auth from '../firebase-config';
 import { useAuthContext } from '../context/AuthContext';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -25,25 +25,26 @@ const Auth = () => {
   const { 
     setCodeforcesId,
     setCodechefId,
-     setLeetcodeId,
-     setInstitution} 
- =useUser();
-   const [email, setEmail] = useState("");
+    setLeetcodeId,
+    setInstitution
+  } = useUser();
+  
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { setLoggedIn , setEmail : setEmaill , setuser } = useAuthContext();
+  const { setLoggedIn, setEmail: setEmaill, setUser } = useAuthContext();
 
   const updateTheLoginStatus = async (email) => {
-    await updatEdata(email);
+    await updateData(email);
     setLoggedIn(true);
     setEmaill(email);
   }
 
-  const updatEdata = async (email) => {
+  const updateData = async (email) => {
     const userDoc = doc(firestore, 'users', email);
     const docSnap = await getDoc(userDoc);
 
-    localStorage.setItem("loggedIn" , true);
+    localStorage.setItem("loggedIn", "true");
 
     console.log(docSnap.data);
 
@@ -57,7 +58,7 @@ const Auth = () => {
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response.user);
       localStorage.setItem('user', JSON.stringify(response.user));
-      setuser(response.user);
+      setUser(response.user);
       toast.success("User registered successfully");
       await updateTheLoginStatus(response.user.email);
       await fetchUserData(response.user);
@@ -73,7 +74,7 @@ const Auth = () => {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
       localStorage.setItem('user', JSON.stringify(response.user));
-      setuser(response.user);
+      setUser(response.user);
       toast.success("User signed in successfully");
       await updateTheLoginStatus(response.user.email);
       await fetchUserData(response.user);
@@ -92,11 +93,11 @@ const Auth = () => {
 
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          console.log('thhis is the user data' , userData)
-          localStorage.setItem('cfId' , userData.codeforcesId);
-          localStorage.setItem('cdId' , userData.codechefId);
-          localStorage.setItem('ltId' , userData.leetcodeId);
-          localStorage.setItem('In' , userData.institution);
+          console.log('this is the user data', userData)
+          localStorage.setItem('cfId', userData.codeforcesId);
+          localStorage.setItem('cdId', userData.codechefId);
+          localStorage.setItem('ltId', userData.leetcodeId);
+          localStorage.setItem('In', userData.institution);
           setCodechefId(userData.codechefId || '');
           setCodeforcesId(userData.codeforcesId || '');
           setLeetcodeId(userData.leetcodeId || '');
@@ -114,7 +115,7 @@ const Auth = () => {
       const response = await signInWithPopup(auth, provider);
       console.log(response.user);
       localStorage.setItem('user', JSON.stringify(response.user));
-      setuser(response.user);
+      setUser(response.user);
       toast.success("User signed in with Google successfully");
       await updateTheLoginStatus(response.user.email);
       await fetchUserData(response.user);
