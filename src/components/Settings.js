@@ -98,25 +98,12 @@ const Settings = () => {
             </Typography>
             <TextField
               fullWidth
-              label="CodeChef ID"
-              margin="normal"
-              value={codechefId}
-              onChange={(e) => setCodechefId(e.target.value)}
-            />
-            <TextField
-              fullWidth
               label="Codeforces ID"
               margin="normal"
               value={codeforcesId}
               onChange={(e) => setCodeforcesId(e.target.value)}
             />
-            <TextField
-              fullWidth
-              label="LeetCode ID"
-              margin="normal"
-              value={leetcodeId}
-              onChange={(e) => setLeetcodeId(e.target.value)}
-            />
+      
             <TextField
               fullWidth
               label="Institution"
