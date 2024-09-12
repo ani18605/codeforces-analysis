@@ -83,8 +83,6 @@ const Home = () => {
         <main style={styles.main}>
           <Typography variant="h6">User Information</Typography>
           <Typography variant="body1">Codeforces ID: {codeforcesId}</Typography>
-          <Typography variant="body1">CodeChef ID: {codechefId}</Typography>
-          <Typography variant="body1">LeetCode ID: {leetcodeId}</Typography>
           <Typography variant="body1">Institution: {Institution}</Typography>
           <Button variant="contained" color="primary" onClick={handleFetchData} disabled={loading}>
             {loading ? 'Loading...' : 'Show Data'}
